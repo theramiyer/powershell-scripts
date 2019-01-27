@@ -110,16 +110,14 @@ function Get-CitrixStatus {
     }
     process {
         try {
-            $MaintMode = (Get-BrokerMachine -AdminAddress $ControllerFqdn -DNSName $ComputerFqdn -Property InMaintenanceMode -ErrorAction Stop).InMaintenanceMode
+            $BrokerMachine = Get-BrokerMachine -AdminAddress $ControllerFqdn -DNSName $ComputerFqdn -Property InMaintenanceMode -ErrorAction Stop
+
+            $MaintMode = $BrokerMachine.InMaintenanceMode
+            $RegState  = $BrokerMachine.RegistrationState
         }
         catch {
             $MaintMode = 'Unable to fetch'
-        }
-        try {
-            $RegState = (Get-BrokerMachine -AdminAddress $ControllerFqdn -DNSName $ComputerFqdn -ErrorAction Stop).RegistrationState
-        }
-        catch {
-            $RegState = 'Unable to fetch'
+            $RegState  = 'Unable to fetch'
         }
         $Properties = [ordered]@{
             Server            = $ComputerFqdn
