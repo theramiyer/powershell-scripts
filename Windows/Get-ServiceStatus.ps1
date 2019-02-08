@@ -28,6 +28,7 @@ function New-InputFile {
     $Fields = 'ComputerName,Service,NotificationEmail','SVR001,WinRM,admin@domain.com;me@domain.com;you@domain.com,<< Use this line as a guide; delete it before using the script.'
 
     New-Item -Path $Path -ItemType File -Value ($Fields | Out-String).Trim() -Force
+    Write-Host "New file was successfully created at $Path"
 }
 
 function Get-ServiceStatus {
@@ -61,16 +62,22 @@ function Get-ServiceStatus {
                 $ServiceRecords = Import-Csv $InputFilePath -ErrorAction Stop
             }
             catch {
-                Write-Warning $_
+                Write-Warning $PSItem.Exception
                 Write-Error 'Could not read the file.'
                 break
             }
         }
 
+        try {
+            Write-EventLog
+        }
+        catch {
+            
+        }
+
         $style = "<style>BODY{font-family:'Segoe UI';font-size:10pt;line-height: 120%}h1,h2{font-family:'Segoe UI Light';font-weight:normal;}TABLE{border:1px solid white;background:#f5f5f5;border-collapse:collapse;}TH{border:1px solid white;background:#f0f0f0;padding:5px 10px 5px 10px;font-family:'Segoe UI Light';font-size:13pt;font-weight: normal;}TD{border:1px solid white;padding:5px 10px 5px 10px;}</style>"
         
         $ServiceStatusTable = @()
-        $CompletedPath = "$NewTemplatePath\Input.csv"
     }
     
     process {
@@ -79,7 +86,7 @@ function Get-ServiceStatus {
                 $NewTemplatePathItem = Get-Item $NewTemplatePath
                 if ($NewTemplatePathItem.PsIsContainer) {
                     Write-Verbose "The path given is that of a directory. Creating a new input file in the directory."
-                    New-InputFile -Path $CompletedPath
+                    New-InputFile -Path "$NewTemplatePath\Input.csv"
                 }
                 elseif ($NewTemplatePathItem.Extension -eq '.csv') {
                     if (Read-Host "A file exists at the specified path. Would you like to overwrite it?" -imatch '^y') {
@@ -96,7 +103,7 @@ function Get-ServiceStatus {
                 New-InputFile -Path $NewTemplatePath
             }
             else {
-                New-InputFile -Path $CompletedPath
+                New-InputFile -Path "$NewTemplatePath\Input.csv"
             }
         }
         else {
@@ -109,9 +116,9 @@ function Get-ServiceStatus {
                 }
     
                 $ServiceStatusRecord = [ordered]@{
-                    ComputerName = $Record.ComputerName
-                    ServiceName = $Record.Service
-                    Status = $ServiceStatus
+                    ComputerName      = $Record.ComputerName
+                    ServiceName       = $Record.Service
+                    Status            = $ServiceStatus
                     NotificationEmail = $Record.NotificationEmail
                 }
     
@@ -119,13 +126,15 @@ function Get-ServiceStatus {
             }
     
             $StoppedServices = $ServiceStatusTable | Where-Object Status -ne 'Running' | Group-Object NotificationEmail
-    
-            foreach ($Group in $StoppedServices) {
-                $StoppedServices = $Group.Group | Select-Object ComputerName, ServiceName, Status | ConvertTo-Html -As Table -Fragment | Out-String
-    
-                $Body = ConvertTo-Html -Head $style -Body '<p>Hi Team,</p><p>The following services were found to be not running when the status was checked by the Automated Service Status Check monitor.</p>', $StoppedServices, '<p>Please take actions as necessary.</p><p>Thanks,<br />Service Check Bot</p>' | Out-String
-    
-                Send-MailMessage -From $From -To ($Group.Name -split ';').Trim() -SmtpServer $SmtpServer -Subject 'Services found to be not running' -Body $Body -BodyAsHtml
+
+            if ($StoppedServices) {
+                foreach ($Group in $StoppedServices) {
+                    $StoppedServices = $Group.Group | Select-Object ComputerName, ServiceName, Status | ConvertTo-Html -As Table -Fragment | Out-String
+        
+                    $Body = ConvertTo-Html -Head $style -Body '<p>Hi Team,</p><p>The following services were found to be not running when the status was checked by the Automated Service Status Check monitor.</p>', $StoppedServices, '<p>Please take actions as necessary.</p><p>Thanks,<br />Service Check Bot</p>' | Out-String
+        
+                    Send-MailMessage -From $From -To ($Group.Name -split ';').Trim() -SmtpServer $SmtpServer -Subject 'Services found to be not running' -Body $Body -BodyAsHtml
+                }
             }
         }
     }
