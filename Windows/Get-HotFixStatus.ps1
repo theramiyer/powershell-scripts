@@ -1,8 +1,8 @@
 function Get-HotFixStatus { # Incomplete, quick-and-dirty mode
-    $Results = $()
+    $Results = @()
     
-    $computers = Get-Content C:\scripts\computers\computers.txt
-    $patches = Get-Content C:\scripts\computers\kb.txt
+    $computers = 'HQXAVT001', 'HQXAVT002'
+    $patches = 'KB2849697'
     
     foreach ($Computer in $Computers) {
         foreach ($Patch in $Patches) {
@@ -24,6 +24,5 @@ function Get-HotFixStatus { # Incomplete, quick-and-dirty mode
             }
         }
     }
-    
     $Results
 }
