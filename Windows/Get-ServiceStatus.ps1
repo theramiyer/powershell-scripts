@@ -68,13 +68,6 @@ function Get-ServiceStatus {
             }
         }
 
-        try {
-            Write-EventLog
-        }
-        catch {
-            
-        }
-
         $style = "<style>BODY{font-family:'Segoe UI';font-size:10pt;line-height: 120%}h1,h2{font-family:'Segoe UI Light';font-weight:normal;}TABLE{border:1px solid white;background:#f5f5f5;border-collapse:collapse;}TH{border:1px solid white;background:#f0f0f0;padding:5px 10px 5px 10px;font-family:'Segoe UI Light';font-size:13pt;font-weight: normal;}TD{border:1px solid white;padding:5px 10px 5px 10px;}</style>"
         
         $ServiceStatusTable = @()
