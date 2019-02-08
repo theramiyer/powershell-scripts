@@ -108,23 +108,25 @@ function Get-ServiceStatus {
                     $ServiceStatus = $PSItem.Exception
                 }
     
-                $ServiceStatusRecord = [ordered]@{
+                $ServiceStatusTable += New-Object PsObject -Property @{
                     ComputerName      = $Record.ComputerName
                     ServiceName       = $Record.Service
                     Status            = $ServiceStatus
                     NotificationEmail = $Record.NotificationEmail
                 }
-    
-                $ServiceStatusTable += $ServiceStatusRecord
             }
     
-            $StoppedServices = $ServiceStatusTable | Where-Object Status -ne 'Running' | Group-Object NotificationEmail
+            $StoppedServices = $ServiceStatusTable |
+             Where-Object Status -ne 'Running' |
+               Group-Object NotificationEmail
 
             if ($StoppedServices) {
                 foreach ($Group in $StoppedServices) {
-                    $StoppedServices = $Group.Group | Select-Object ComputerName, ServiceName, Status | ConvertTo-Html -As Table -Fragment | Out-String
+                    $FilteredStoppedServices = $Group.Group |
+                     Select-Object ComputerName, ServiceName, Status |
+                      ConvertTo-Html -As Table -Fragment | Out-String
         
-                    $Body = ConvertTo-Html -Head $style -Body '<p>Hi Team,</p><p>The following services were found to be not running when the status was checked by the Automated Service Status Check monitor.</p>', $StoppedServices, '<p>Please take actions as necessary.</p><p>Thanks,<br />Service Check Bot</p>' | Out-String
+                    $Body = ConvertTo-Html -Head $style -Body '<p>Hi Team,</p><p>The following services were found to be not running when the status was checked by the Automated Service Status Check monitor.</p>', $FilteredStoppedServices, '<p>Please take actions as necessary.</p><p>Thanks,<br />Service Check Bot</p>' | Out-String
         
                     Send-MailMessage -From $From -To ($Group.Name -split ';').Trim() -SmtpServer $SmtpServer -Subject 'Services found to be not running' -Body $Body -BodyAsHtml
                 }
