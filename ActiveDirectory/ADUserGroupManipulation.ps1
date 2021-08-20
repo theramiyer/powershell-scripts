@@ -7,7 +7,7 @@ function Find-AdUser {
         $Identity,
 
         # Names of domains
-        [Parameter()]
+        [Parameter(Position = 1)]
         [string[]]
         $Domains = $env:USERDNSDOMAIN
     )
@@ -36,7 +36,7 @@ function Find-AdGroup {
         $Identity,
 
         # Names of domains
-        [Parameter()]
+        [Parameter(Position = 1)]
         [string[]]
         $Domains = $env:USERDNSDOMAIN
     )
@@ -107,7 +107,7 @@ function Add-AdUserToGroup {
                 $GroupDn = Find-AdGroup $Group -Domains $Domains
                 if ($GroupDn) {
                     Write-Verbose "Adding $Identity to $($GroupDn.Name)"
-                    Add-AdGroupMember $GroupDn -Member $UserDetails.DistinguishedName -Credential $Credential -ErrorAction Stop
+                    Add-AdGroupMember $GroupDn -Member $UserDetails -Credential $Credential -ErrorAction Stop
                 }
                 else {
                     Write-Error "Unable to find $($Group)" -ErrorAction Continue
