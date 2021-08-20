@@ -1,7 +1,3 @@
-function main {
-    Add-UserToAdGroup -UserSam 'JohnDoe' -GroupName 'GroupOne', 'GroupTwo' -Domains 'first.domain.com', 'second.domain.com' -Credential 'DOM\U739937'
-}
-
 function Find-AdUser {
     [CmdletBinding()]
     param (
@@ -60,7 +56,7 @@ function Find-AdGroup {
     }
 }
 
-function Add-UserToAdGroup {
+function Add-AdUserToGroup {
     [CmdletBinding()]
     param (
         # User's SAM account name
@@ -189,5 +185,3 @@ function Remove-AdUserFromGroup {
         Remove-Module ActiveDirectory
     }
 }
-
-. main
