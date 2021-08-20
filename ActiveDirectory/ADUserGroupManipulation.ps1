@@ -96,7 +96,9 @@ function Add-AdUserToGroup {
         }
 
         Write-Verbose "Getting the group membership of $Identity"
-        $UserMembership = (Get-AdUser $UserDetails -Properties Memberof).MemberOf
+        $UserMembership = (
+            Get-AdUser $UserDetails -Properties Memberof
+        ).MemberOf
 
         foreach ($Group in $GroupName) {
             Write-Verbose "Processing $Group"
