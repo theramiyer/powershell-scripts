@@ -22,9 +22,8 @@ function Find-AdUser {
         catch {
             Write-Verbose "$Identity not found in $Domain"
         }
-
-        $UserDetails
     }
+    $UserDetails
 }
 
 function Find-AdGroup {
@@ -51,9 +50,8 @@ function Find-AdGroup {
         catch {
             Write-Verbose "$Identity not found in $Domain"
         }
-
-        $GroupDetails
     }
+    $GroupDetails
 }
 
 function Add-AdUserToGroup {
@@ -109,7 +107,7 @@ function Add-AdUserToGroup {
                 $GroupDn = Find-AdGroup $Group -Domains $Domains
                 if ($GroupDn) {
                     Write-Verbose "Adding $Identity to $($GroupDn.Name)"
-                    Add-AdGroupMember $GroupDn -Member $UserDetails -Credential $Credential -ErrorAction Stop
+                    Add-AdGroupMember $GroupDn -Members $UserDetails -Credential $Credential -ErrorAction Stop
                 }
                 else {
                     Write-Error "Unable to find $($Group)" -ErrorAction Continue
@@ -171,7 +169,7 @@ function Remove-AdUserFromGroup {
                 $GroupDn = Find-AdGroup $Group -Domains $Domains
                 if ($GroupDn) {
                     Write-Verbose "Adding $Identity to $($GroupDn.Name)"
-                    Remove-AdGroupMember $GroupDn -Member $UserDetails.DistinguishedName -Credential $Credential -ErrorAction Stop
+                    Remove-AdGroupMember $GroupDn -Members $UserDetails -Credential $Credential -ErrorAction Stop
                 }
                 else {
                     Write-Error "Unable to find $($Group)" -ErrorAction Continue
